@@ -8,6 +8,7 @@
 
 import UIKit
 import AFNetworking
+import MBProgressHUD
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate  {
 
@@ -15,21 +16,26 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     var movies: [NSDictionary]?
     var endpoint: String!
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.dataSource = self
         tableView.delegate = self
-        requestNetwork()
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(requestNetwork(refreshControl:)), for: UIControlEvents.valueChanged)
+        tableView.insertSubview(refreshControl, at: 0)
+        
+        requestNetwork(refreshControl: refreshControl)
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-    func requestNetwork(){
+    
+    // MARK: - REQUEST NETWORK
+    func requestNetwork(refreshControl: UIRefreshControl){
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
         let url = URL(string: "https://api.themoviedb.org/3/movie/\(endpoint!)?api_key=\(apiKey)")
         let request = URLRequest(url: url!)
@@ -42,10 +48,18 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             delegate: nil,
             delegateQueue: OperationQueue.main
         )
+        
+        // Display HUD before make request
+        MBProgressHUD.showAdded(to: self.view, animated: true)
+        
         let task: URLSessionDataTask =
             session.dataTask(with: request,
-                             completionHandler: { (dataOrNil, response, error) in
-                                if let data = dataOrNil {
+                             completionHandler: { (dataOrNil, response, errorOrNil) in
+                                
+                                /*if let requestErr = errorOrNil{
+                                    //
+                                } else*/
+                                    if let data = dataOrNil {
                                     if let responseDictionary = try! JSONSerialization.jsonObject(
                                         with: data, options:[]) as? NSDictionary {
                                         //print("response: \(responseDictionary)")
@@ -56,6 +70,10 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                                 } else {
                                     print("There was a network error.")
                                 }
+
+                                // Hide HUD when data sent back from request
+                                MBProgressHUD.hide(for: self.view, animated: true)
+                                refreshControl.endRefreshing()
             })
         task.resume()
     }
@@ -80,12 +98,65 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         if let posterPath = movie["poster_path"] as? String{
             let baseURL = "https://image.tmdb.org/t/p/w500"
+            
+            // MARK: - cell.posterView.setImageWith (Fade in Effect)
             let imageURL = NSURL(string: baseURL + posterPath)
-            cell.posterView.setImageWith(imageURL as! URL)
+            //cell.posterView.setImageWith(imageURL as! URL)
+            
+            let imageRequest = NSURLRequest(url: imageURL as! URL)
+            cell.posterView.setImageWith(
+                imageRequest as URLRequest,
+                placeholderImage: nil,
+                success: { (imageRequest, imageResponse, image) in
+                    // imageResponse will be nil if the image is cached
+                    if imageResponse != nil {
+                        //print("Image was NOT cached, fade in image")
+                        cell.posterView.alpha = 0.0
+                        cell.posterView.image = image
+                        UIView.animate(withDuration: 0.3, animations: { () -> Void in
+                            cell.posterView.alpha = 1.0
+                        })
+                    } else {
+                        //print("Image was cached so just update the image")
+                        cell.posterView.image = image
+                    }
+                },
+                failure: { (imageRequest, imageResponse, error) in
+                    // do something for the failure condition
+            })
+            
+            //cell = loadMoviePoster(imageURL: imageURL!,cell: cell)
         }
         
         return cell
     }
+    
+    /*
+    func loadMoviePoster(imageURL: NSURL, cell: MovieCell) -> MovieCell{
+        let imageRequest = NSURLRequest(url: imageURL as URL)
+        cell.posterView.setImageWith(
+            imageRequest as URLRequest,
+            placeholderImage: nil,
+            success: { (imageRequest, imageResponse, image) in
+                // imageResponse will be nil if the image is cached
+                if imageResponse != nil {
+                    //print("Image was NOT cached, fade in image")
+                    cell.posterView.alpha = 0.0
+                    cell.posterView.image = image
+                    UIView.animate(withDuration: 0.3, animations: { () -> Void in
+                        cell.posterView.alpha = 1.0
+                    })
+                } else {
+                    //print("Image was cached so just update the image")
+                    cell.posterView.image = image
+                }
+            },
+            failure: { (imageRequest, imageResponse, error) in
+                // do something for the failure condition
+        })
+        return cell
+    }
+    */
     
     
     
@@ -101,9 +172,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let movie = movies?[(indexpath?.row)!]
         
         let detailViewController = segue.destination as! DetailViewController
-        detailViewController.movie = movie 
-        
-        
+        detailViewController.movie = movie
     }
     
     
