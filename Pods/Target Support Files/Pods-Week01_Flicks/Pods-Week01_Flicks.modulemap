@@ -1,0 +1,6 @@
+framework module Pods_Week01_Flicks {
+  umbrella header "Pods-Week01_Flicks-umbrella.h"
+
+  export *
+  module * { export * }
+}
