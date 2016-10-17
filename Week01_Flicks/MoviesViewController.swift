@@ -10,19 +10,21 @@ import UIKit
 import AFNetworking
 import MBProgressHUD
 
-class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate  {
+class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate  {
 
     @IBOutlet weak var tableView: UITableView!
     var movies: [NSDictionary]?
     var endpoint: String!
+    var refreshControl: UIRefreshControl!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        createSearchBar()
+        
         tableView.dataSource = self
         tableView.delegate = self
         
-        let refreshControl = UIRefreshControl()
+        refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(requestNetwork(refreshControl:)), for: UIControlEvents.valueChanged)
         tableView.insertSubview(refreshControl, at: 0)
         
@@ -158,6 +160,82 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     }
     */
     
+    
+    func createSearchBar(){
+        let searchBar = UISearchBar()
+        searchBar.showsCancelButton = false
+        searchBar.placeholder = "Enter movie info here!"
+        searchBar.delegate = self
+        self.navigationItem.titleView = searchBar
+    }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar){
+        searchBar.becomeFirstResponder()
+        searchBar.showsCancelButton = true
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar){
+        //searchBar.showsCancelButton = false
+        searchBar.resignFirstResponder()
+        
+        print(searchBar.text!)
+        searchMovie(movieSearchString: searchBar.text!)
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar){
+        searchBar.showsCancelButton = false
+        searchBar.resignFirstResponder()
+        
+        requestNetwork(refreshControl: self.refreshControl)
+    }
+    
+    // MARK: - SEARCH
+    func searchMovie(movieSearchString: String!){
+        let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
+        let url = URL(string: "https://api.themoviedb.org/3/search/movie?api_key=\(apiKey)&query=\(movieSearchString!)")
+        let request = URLRequest(url: url!)
+        
+        
+        print(url)
+        
+        /*let request = URLRequest(
+         url: url!,
+         cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData,
+         timeoutInterval: 10)*/
+        let session = URLSession(
+            configuration: URLSessionConfiguration.default,
+            delegate: nil,
+            delegateQueue: OperationQueue.main
+        )
+        
+        // Display HUD before make request
+        MBProgressHUD.showAdded(to: self.view, animated: true)
+        
+        let task: URLSessionDataTask =
+            session.dataTask(with: request,
+                             completionHandler: { (dataOrNil, response, errorOrNil) in
+                                
+                                /*if let requestErr = errorOrNil{
+                                 //
+                                 } else*/
+                                if let data = dataOrNil {
+                                    if let responseDictionary = try! JSONSerialization.jsonObject(
+                                        with: data, options:[]) as? NSDictionary {
+                                        //print("response: \(responseDictionary)")
+                                        
+                                        self.movies = responseDictionary["results"] as? [NSDictionary]
+                                        self.tableView.reloadData()
+                                    }
+                                } else {
+                                    print("There was a network error.")
+                                }
+                                
+                                // Hide HUD when data sent back from request
+                                MBProgressHUD.hide(for: self.view, animated: true)
+                                self.refreshControl.endRefreshing()
+            })
+        task.resume()
+    }
     
     
     // MARK: - Navigation
