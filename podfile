@@ -8,4 +8,5 @@ target 'Week01_Flicks' do
   # Pods for Week01_Flicks
   pod 'AFNetworking'
   pod 'MBProgressHUD'
+  pod 'Reachability'
 end

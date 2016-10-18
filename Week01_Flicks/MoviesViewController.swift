@@ -9,13 +9,21 @@
 import UIKit
 import AFNetworking
 import MBProgressHUD
+import Reachability
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate  {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var networkErrorView: UIView!
     var movies: [NSDictionary]?
     var endpoint: String!
     var refreshControl: UIRefreshControl!
+    var reachability: Reachability?
+    
+    override func viewWillAppear(_ animated: Bool) {
+        setupReachability()
+        setErrorViewHidden()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,19 +33,19 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.delegate = self
         
         refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(requestNetwork(refreshControl:)), for: UIControlEvents.valueChanged)
+        refreshControl.addTarget(self, action: #selector(requestNetwork), for: UIControlEvents.valueChanged)
         tableView.insertSubview(refreshControl, at: 0)
         
-        requestNetwork(refreshControl: refreshControl)
+        requestNetwork()//refreshControl: refreshControl)
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
     // MARK: - REQUEST NETWORK
-    func requestNetwork(refreshControl: UIRefreshControl){
+    func requestNetwork(){//refreshControl: UIRefreshControl){
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
         let url = URL(string: "https://api.themoviedb.org/3/movie/\(endpoint!)?api_key=\(apiKey)")
         let request = URLRequest(url: url!)
@@ -75,7 +83,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
 
                                 // Hide HUD when data sent back from request
                                 MBProgressHUD.hide(for: self.view, animated: true)
-                                refreshControl.endRefreshing()
+                                self.refreshControl.endRefreshing()
             })
         task.resume()
     }
@@ -164,7 +172,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     func createSearchBar(){
         let searchBar = UISearchBar()
         searchBar.showsCancelButton = false
-        searchBar.placeholder = "Enter movie info here!"
+        searchBar.placeholder = "Search movies"
         searchBar.delegate = self
         self.navigationItem.titleView = searchBar
     }
@@ -186,7 +194,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         searchBar.showsCancelButton = false
         searchBar.resignFirstResponder()
         
-        requestNetwork(refreshControl: self.refreshControl)
+        requestNetwork()//refreshControl: self.refreshControl)
     }
     
     // MARK: - SEARCH
@@ -235,6 +243,38 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                                 self.refreshControl.endRefreshing()
             })
         task.resume()
+    }
+    
+    // MARK: - Reachability Setup
+    func setupReachability(){
+        // Allocate a reachability object
+        self.reachability = Reachability.forInternetConnection()
+        
+        // Tell the reachability that we DON'T want to be reachable on 3G/EDGE/CDMA
+        self.reachability!.reachableOnWWAN = false
+        
+        // Here we set up a NSNotification observer. The Reachability that caused the notification
+        // is passed in the object parameter
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(reachabilityChanged),
+                                               name: NSNotification.Name.reachabilityChanged,
+                                               object: nil)
+        
+        self.reachability!.startNotifier()
+    }
+    
+    func reachabilityChanged(notification: NSNotification) {
+        setErrorViewHidden()
+    }
+    
+    func setErrorViewHidden(){
+        if self.reachability!.isReachableViaWiFi() || self.reachability!.isReachableViaWWAN() {
+            print("Service avalaible!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            self.networkErrorView.isHidden = true
+        } else {
+            print("No service avalaible!!!!!!!!!!!!!!!!!!!!!!!!!")
+            self.networkErrorView.isHidden = false
+        }
     }
     
     

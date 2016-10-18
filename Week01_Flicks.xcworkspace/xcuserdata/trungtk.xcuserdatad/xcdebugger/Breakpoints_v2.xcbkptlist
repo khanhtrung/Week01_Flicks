@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Week01_Flicks/MoviesViewController.swift"
-            timestampString = "498398258.712115"
+            timestampString = "498480247.397839"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "45"
-            endingLineNumber = "45"
-            landmarkName = "requestNetwork(refreshControl:)"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
+            landmarkName = "requestNetwork()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -26,12 +26,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Week01_Flicks/MoviesViewController.swift"
-            timestampString = "498398258.712115"
+            timestampString = "498480247.397839"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "41"
-            endingLineNumber = "41"
-            landmarkName = "requestNetwork(refreshControl:)"
+            startingLineNumber = "49"
+            endingLineNumber = "49"
+            landmarkName = "requestNetwork()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Week01_Flicks/MoviesViewController.swift"
-            timestampString = "498398258.712115"
+            timestampString = "498480247.397839"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "108"
-            endingLineNumber = "108"
+            startingLineNumber = "116"
+            endingLineNumber = "116"
             landmarkName = "tableView(_:cellForRowAt:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Week01_Flicks/MoviesViewController.swift"
-            timestampString = "498398453.886763"
+            timestampString = "498480247.397839"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "196"
-            endingLineNumber = "196"
+            startingLineNumber = "204"
+            endingLineNumber = "204"
             landmarkName = "searchMovie(movieSearchString:)"
             landmarkType = "7">
          </BreakpointContent>
