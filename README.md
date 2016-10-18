@@ -32,7 +32,19 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='https://github.com/khanhtrung/Week01_Flicks/blob/master/Flicks.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+Now playing and Top rated:
+
+<img src='https://github.com/khanhtrung/Week01_Flicks/blob/master/Walkthrough/Flicks_01_Main.gif' title='Video Walkthrough - Now playing and Top rated' width='' alt='Video Walkthrough - Now playing and Top rated' />
+
+
+Search movies:
+
+<img src='https://github.com/khanhtrung/Week01_Flicks/blob/master/Walkthrough/Flicks_02_Search.gif' title='Video Walkthrough - Search movies' width='' alt='Video Walkthrough - Search movies' />
+
+
+Network error message:
+
+<img src='https://github.com/khanhtrung/Week01_Flicks/blob/master/Walkthrough/Flicks_03_Network_error.gif' title='Video Walkthrough - Network error message' width='' alt='Video Walkthrough - Network error message' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
