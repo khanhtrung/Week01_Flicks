@@ -22,7 +22,9 @@ class DetailViewController: UIViewController {
 
         // Do any additional setup after loading the view.
         
-        scrollView.contentSize = CGSize(width: scrollView.frame.width, height: infoView.frame.origin.y + infoView.frame.size.height )
+        scrollView.contentSize = CGSize(
+            width: scrollView.frame.width,
+            height: infoView.frame.origin.y + infoView.frame.size.height )
         
         
         let title = movie["title"] as? String
@@ -34,9 +36,55 @@ class DetailViewController: UIViewController {
         //infoView.sizeToFit()
         
         if let posterPath = movie["poster_path"] as? String{
-            let baseURL = "https://image.tmdb.org/t/p/w500"
-            let imageURL = NSURL(string: baseURL + posterPath)
-            posterImageView.setImageWith(imageURL as! URL)
+            
+            // MARK: - cell.posterView.setImageWith (Fade in Effect)
+            let baseURL = "https://image.tmdb.org/t/p/w130"
+            let imageURL = URL(string: baseURL + posterPath)!
+            //posterImageView.setImageWith(imageURL as! URL)
+            let imageRequest = NSURLRequest(url: imageURL)
+            
+            posterImageView.setImageWith(
+                imageRequest as URLRequest,
+                placeholderImage: nil,
+                success: { (imageRequest, imageResponse, image) in
+                    // imageResponse will be nil if the image is cached
+                    //if imageResponse != nil {
+                    
+                        //print("Image was NOT cached, fade in image")
+                        self.posterImageView.alpha = 0.0
+                        self.posterImageView.image = image
+                        UIView.animate(withDuration: 0.3,
+                                       animations: { () -> Void in self.posterImageView.alpha = 1.0 },
+                                       completion: { (success) in
+                                        
+                                        // The AFNetworking ImageView Category only allows one request to be sent at a time
+                                        // per ImageView. This code must be in the completion block.
+                                        let bigImageURL = URL(string: "https://image.tmdb.org/t/p/w500" + posterPath)!
+                                        let bigImageRequest = NSURLRequest(url: bigImageURL)
+                                        
+                                        self.posterImageView.setImageWith(
+                                            bigImageRequest as URLRequest,
+                                            placeholderImage: nil,
+                                            success: { (bigImageRequest, bigImageResponse, bigImage) in
+                                                if bigImageResponse != nil {
+                                                    
+                                                    // success get hi res image
+                                                    self.posterImageView.image = bigImage
+                                                }
+                                            }, failure: { (imageRequest, imageResponse, error) in
+                                                // do something for the failure condition
+                                        })
+                        })
+                    
+//                    } else {
+//                        //print("Image was cached so just update the image")
+//                        self.posterImageView.image = image
+//                    }
+                },
+                failure: { (imageRequest, imageResponse, error) in
+                    // do something for the failure condition
+            })
+            
         }
     }
 
